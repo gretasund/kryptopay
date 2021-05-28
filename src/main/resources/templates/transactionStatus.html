@@ -1,0 +1,61 @@
+<script>
+    let stompClient;
+
+    function connectToSocket() {
+        let paymentId = document.getElementById("payment_id").value;
+        console.log("Trying to open connection to /payment-status/" + paymentId);
+        let socket = new SockJS("/payment-status");
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log("connected to the frame: " + frame);
+            stompClient.subscribe("/topic/payment/" + paymentId, function (response) {
+                console.log("data");
+                let data = JSON.parse(response.body);
+                console.log(data);
+                let node = document.createElement("li");
+                let textnode = document.createTextNode(data);
+                node.appendChild(textnode);
+                document.getElementById("paymentMessages").appendChild(node);
+            })
+        })
+    }
+</script>
+
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>Document</title>
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" rel="stylesheet">
+    <!--    libs for stomp and sockjs-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <!--    end libs for stomp and sockjs-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+<body>
+<div class="text-center" id="box">
+    <header>
+        <h1>Zahlungsstatus</h1>
+    </header>
+
+
+    <input id="payment_id" placeholder="Zahlungs-ID">
+    <button onclick="connectToSocket()">Zahlung anzeigen</button>
+    <div id="message"></div>
+    <ul id="paymentMessages">
+        <li th:text="'Aktuell ist die Zahlung ' + ${payment.getDepth()} + ' Blöcke tief in der Blockchain'"></li>
+    </ul>
+    <div class="clearfix"></div>
+</div>
+<!--<script src="js/script.js"></script>
+<script src="js/socketjs.js"></script>-->
+</body>
+</body>
+</html>
+
